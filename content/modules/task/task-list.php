@@ -1,12 +1,12 @@
 <?php
-	$taskManager = new Task();
-	$departmentManager = new DepartmentDAO();
+	$taskDAO = new TaskDAO();
+	$departmentDAO = new DepartmentDAO();
 	$taskList = [];
 	
 	if( isset( $_GET['department'] ) && isset( $_GET['target'] ) ) {
-		$taskList = $taskManager->list( $_GET['department'], $_GET['target'] );
-	} elseif ( $this->session->hasPrivilege( 'task-monitor' ) ) {
-		$taskList = $taskManager->list();
+		$taskList = $taskDAO->getList( $_GET['department'], $_GET['target'] );
+	} elseif ( $this->session->hasPrivilege( TASK_MONITOR ) ) {
+		$taskList = $taskDAO->getList();
 	} else {
 		$deps = [];
 		$activeUserJobs = $this->session->getActiveUserJobs();
@@ -19,14 +19,14 @@
 				}
 			}
 		}
-		$taskList = $taskManager->list( $deps );
+		$taskList = $taskDAO->getList( $deps );
 	}
 ?>
 	<div class='flex flex_row padding_bottom space_between'>
 		<div class="bigger_font">
 			<?php 
 				if( isset( $_GET['department'] ) && isset( $_GET['target'] ) ) {
-					$depNameFromID = $departmentManager->getNameFromID( $_GET['department'] );
+					$depNameFromID = $departmentDAO->getNameFromID( $_GET['department'] );
 			?>	
 				<a class="underline_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=target&department=" . $_GET['department']); ?>" title="<?php echo TARGETS_BY_DEPARTMENT; ?>"><?php echo htmlentities( $depNameFromID, ENT_QUOTES ); ?></a>
 			<?php } ?>
@@ -45,10 +45,10 @@
 		} else {
 			$rowCount = 0;
 			foreach ( $taskList as $task ) {
-				$indicator = new Indicator( $task->target, $task->code );
-				$depName = $departmentManager->getNameFromID( $task->department );
+				$depName = $departmentDAO->getNameFromID( $task->department );
 				$rowColor = ( $rowCount % 2 ) ? 'light_grey_background' : 'dark_grey_background';
-				if( $indicator->isComplete() ) $rowColor = ' progressCompleteColor';
+				$indicatorDAO = new IndicatorDAO();
+				if( $indicatorDAO->isComplete( $task->target, $task->code ) ) $rowColor = ' progressCompleteColor';
 				$rowCount++;
 				?>
 			<div class="flex flex_row">
@@ -89,9 +89,14 @@
 				</div>
 				
 				<?php if( $this->session->hasPrivilege(TASK_EDIT) ) { ?>
-					<div class="flex light_blue_background_hover <?php echo esc( $rowColor ); ?>">
-						<a style="width: 60px;" class="flex align_middle align_center dark_blue_text_hover zoom" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=task&action=open&target=". $task->target . '&code=' . $task->code  ); ?>" title="Visualizza scheda attività">
+					<div class="flex flex_column <?php echo esc( $rowColor ); ?>">
+						<a style="height: 50%; width: 60px;" class="flex align_middle align_center dark_blue_text_hover zoom" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=task&action=".TASK_EDIT."&target=". $task->target . '&code=' . $task->code  ); ?>" title="Visualizza scheda attività">
 							<i class="material-icons transition">zoom_in</i>
+						</a>
+					 	<a style="height: 50%; width: 60px;" class="zoom red_text_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=task&action=".TASK_DELETE."&target=". $task->target . '&code=' . $task->code  ); ?>" title="Elimina">
+							<div class="flex align_middle full_height align_center">
+								<i class="material-icons">delete</i>
+							</div>
 						</a>
 					</div>
 				<?php } ?>

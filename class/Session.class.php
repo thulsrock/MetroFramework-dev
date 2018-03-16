@@ -2,38 +2,38 @@
 
 class Session {
 	
-	private $ID;
-	private $username;
-	private $userID;
-	private $jobs;
+	private static $instance = NULL;
 
-	public function __construct() {
-		if( PHP_SESSION_NONE ) $this->ID = session_id();
-		
-		if( !isset( $_SESSION['user_id'] ) ) {
-			$_SESSION['user_id'] = 0;
-		}	
+	private function __construct() {
+		session_start();
+		$_SESSION['sessionID'] = session_id();
 		if( !isset( $_SESSION['user_is_logged'] ) ) {
 			$_SESSION['user_is_logged'] = FALSE;
 		}
 	}
 	
-	public function setGlobals ( String $username ) {
+	public static function getInstance() {
+		if( self::$instance == NULL ) {
+			$c = __CLASS__;
+			self::$instance = new $c; 
+		}
+		return self::$instance;
+	}
+		
+	public function updateAfterLogin ( $user ) {
+		$_SESSION['user'] = $user;
 		$_SESSION['user_is_logged'] = TRUE;
-		$user = new User();
+		$userDAO = new UserDAO();
 		
 		try {
-			$_SESSION['user_id'] = $user->getUserIDFromUsername( $username );
-			$_SESSION['username'] = $username;
-			$_SESSION['jobs'] = $user->getJobsAndFeaturesFromUserID( $_SESSION['user_id'] );
+			$_SESSION['user']->jobs = $userDAO->getJobsAndFeaturesFromUserID( $_SESSION['user']->getID() );
 		} catch (Exception $e) {
-			throw new SessionNoGlobalsException();
+			throw new Exception(SESSION_NO_GLOBAL_INIT);
 		}
-
 	}
 	
 	public function getActiveUserJobs() {
-		return $_SESSION['jobs'];
+		return $_SESSION['user']->jobs;
 	}
 
 	public function isLogged() {
@@ -45,11 +45,11 @@ class Session {
 	}
 
 	public function getUsername() {
-		return $_SESSION['username'];
+		return $_SESSION['user']->username;
 	}
 	
 	public function getID() {
-		return $this->ID;
+		return $_SESSION['sessionID'];
 	}
 	
 	public function hasPrivilege( $privilege ) {
@@ -65,15 +65,18 @@ class Session {
 	}
 
 	public function getDepartments() {
-		foreach( $_SESSION['jobs'] as $job ) {
-			$deps[] = $job['department'];
+		foreach( $this->getActiveUserJobs() as $job ) {
+			$deps[] = $job->department;
 		}
 		return $deps;
 	}
 	
 	public function logout() {
-		$_SESSION['user_is_logged'] = FALSE;
-		session_unset();
+		$this->setUserNotLogged();
 		session_destroy();
+		redirectToRoot();
+	}
+	public function setUserNotLogged() {
+		$_SESSION['user_is_logged'] = FALSE;
 	}
 }

@@ -1,13 +1,13 @@
 <?php
 
-	$userManager = new User();
+	$userDAO = new User();
 	
 	$userID = $_GET['user'];
-	$user = $userManager->getUserDetailFromID( $userID );
-	$jobs = $userManager->getJobsAndFeaturesFromUserID( $userID );
+	$user = $userDAO->getUserDetailFromID( $userID );
+	$jobs = $userDAO->getJobsAndFeaturesFromUserID( $userID );
 
-	$departmentManager = new DepartmentDAO();
-	$departmentList = $departmentManager->departmentList();
+	$departmentDAO = new DepartmentDAO();
+	$departmentList = $departmentDAO->departmentList();
 
 ?>
 <form method="post" enctype="multipart/form-data" action="" accept-charset="UTF-8" >
@@ -61,7 +61,7 @@
 				
 				<?php
 					foreach ( $jobs as $jobID => $job ) {
-						$departmentName = $departmentManager->getNameFromID( $job->department );
+						$departmentName = $departmentDAO->getNameFromID( $job->department );
 				?>			
 				
 				<div class="flex flex_row full_width light_blue_background_hover">

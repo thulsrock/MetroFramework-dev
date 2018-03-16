@@ -5,9 +5,13 @@ class Render {
 	protected $message;
 	
 	public function __construct( $message, $log = FALSE, $sessionID = NULL, $username = NULL ) {
-		
 		$this->message = $message;
-		
+
+		if( $this->message instanceof Notice ) {
+			$this->noticeRender();
+		} else {
+			$this->exceptionRender();
+		}
 		if( $log ) $this->log( $sessionID, $username );
 	}
 	

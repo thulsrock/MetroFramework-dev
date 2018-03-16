@@ -1,18 +1,12 @@
 <?php
 
-class FeatureDAO {
+class FeatureDAO extends DAO {
 	
-	private $pdo;
 	private $ID;
 	private $code;
 	private $name;
 	private $description;
-	
-	public function __construct() {
-		$dao = new Dao();
-		$this->pdo = $dao->getPdo();
-	}
-	
+
 	public function getFeatureFromJobID( int $jobID ) {
 		$query = 	"SELECT f.code, f.name, f.description
 					FROM feature f
@@ -25,15 +19,13 @@ class FeatureDAO {
 		return $stmt->fetchAll( PDO::FETCH_OBJ );
 	}
 	
-	public function getFeatureFullList() {
+	public function getList() {
 		$query =	"SELECT *
 					FROM feature
 					ORDER BY area, name ASC";
-		$stmt = $this->pdo->prepare ( $query );
-		$stmt->execute ();
-		return $stmt->fetchAll( PDO::FETCH_OBJ );
+		return parent::queryObjList($query);
 	}
-	
+
 	public function getFeatureByArea( $featureArea ) {
 		$query =	'SELECT *
 					FROM feature
@@ -54,6 +46,20 @@ class FeatureDAO {
 		$query =	'SELECT * FROM feature_area';
 		$stmt = $this->pdo->prepare ( $query );
 		$stmt->execute ();
+		$result = $stmt->fetchAll( PDO::FETCH_OBJ );
+		if( $stmt->rowCount() > 0 ) return $result;
+		else return NULL;
+	}
+	
+	public function getFeatureArea( $job ) {
+		$query = 	"SELECT DISTINCT fa.name name, fa.description description
+					FROM feature_area fa
+					JOIN feature f ON fa.name = f.area
+					JOIN userjob_feature uf ON f.code = uf.feature
+					JOIN userjob uj ON uf.userjob = uj.ID
+					WHERE uj.ID = ?";
+		$stmt = $pdo->prepare ( $query );
+		$stmt->execute ( [$job] );
 		$result = $stmt->fetchAll( PDO::FETCH_OBJ );
 		if( $stmt->rowCount() > 0 ) return $result;
 		else return NULL;

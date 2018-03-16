@@ -3,22 +3,20 @@
 	$target = esc( $_GET['target'] );
 	$code = esc( $_GET['code'] );
 		
-	$taskManager = new Task();
-	$task = $taskManager->getTaskDetail( $target, $code );
-	$task->department = $taskManager->getDepartment( $target );
-	$task->staff = $taskManager->getStaff($target, $code);
+	$taskDAO = new TaskDAO();
+	$task = $taskDAO->getAllDetails( $target, $code );
 
-	$encodedFileDir = UPLOAD_DIR . rawurlencode( $task->department->name ) . '/' . $target . '/' . $code;
-	$fileDir = UPLOAD_DIR . $task->department->name . '/' . $target . '/' . $code;
+	$encodedFileDir = UPLOAD_DIR . rawurlencode( $task->department->name ) . '/' . $task->target . '/' . $task->code;
+	$fileDir = UPLOAD_DIR . $task->department->name . '/' . $task->target . '/' . $task->code;
 
 ?> 
 
 <form method="post" enctype="multipart/form-data" action="" >
 	<div class='noprint flex flex_row padding_bottom space_between wrap' style="min-height: 35px;">
 		<div class="bigger_font">
-			<a class="underline_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=target&department=" . $task->department->ID ); ?>&target=<?php echo $target;?>" title="<?php echo TARGETS_BY_DEPARTMENT; ?>"><?php echo esc( $task->department->name ); ?></a>
+			<a class="underline_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=target&department=" . $task->department->ID ); ?>&target=<?php echo $task->target;?>" title="<?php echo TARGETS_BY_DEPARTMENT; ?>"><?php echo esc( $task->department->name ); ?></a>
 			<span> >> </span>
-			<a class="underline_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=task&department=" . $task->department->ID ); ?>&target=<?php echo $target;?>" title="<?php echo TASKS_BY_TARGET; ?>"><?php echo $target; ?></a>
+			<a class="underline_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=task&department=" . $task->department->ID ); ?>&target=<?php echo $task->target;?>" title="<?php echo TASKS_BY_TARGET; ?>"><?php echo $task->target; ?></a>
 		</div>
 	</div>
 	<div class='indicator_edit flex flex_column shadow round_border space_between light_grey_border border padding'>
@@ -105,10 +103,11 @@
 					foreach ( $files as $file ) { 
 						if ($file == '.' || $file == '..') continue; 
 						$attachments = TRUE;
+						$deleteAttachmentLink = htmlspecialchars( $_SERVER['PHP_SELF'] . "?module=indicator&department=" . $task->department->ID . "&target=" . $task->target . "&code=" . $task->code . "&action=indicatorAttachmentDelete&file=" ) . rawurlencode ( $file );
 						?>
 						<div class='flex flex_row light_grey_background'>
 							<div class='full_grow light_blue_background_hover transition padding'><a class='block' href="<?php echo $encodedFileDir . '/' . rawurlencode ( $file ); ?>" title="Leggi il documento"><i class="material-icons align_middle zoom small_right_margin">&#xE8FF;</i><?php echo $file; ?></a></div>
-							<div class="flex flex_column align_middle align_center padding"><a class='red_text_hover block zoom' href="<?php echo htmlspecialchars( $_SERVER['REQUEST_URI'].'&action=deleteTaskAttachment&file=' ) . rawurlencode ( $file ); ?>" title="Elimina il documento"><i class="material-icons align_middle">&#xE14C;</i></a></div>
+							<div class="flex flex_column align_middle align_center padding"><a class='red_text_hover block zoom' href="<?php echo $deleteAttachmentLink; ?>" title="Elimina il documento"><i class="material-icons align_middle">&#xE14C;</i></a></div>
 						</div>
 					<?php							
 					}

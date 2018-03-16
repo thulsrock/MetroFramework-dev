@@ -1,9 +1,9 @@
 <?php
 	try {
-		$targetManager = new Target();
-		$target = $targetManager->getTargetDetailsFromCode( $_GET['target'] );
-		$departmentManager = new DepartmentDAO();
-		$department = $departmentManager->getNameFromID($target->department);
+		$targetDao = new TargetDAO();
+		$target = $targetDao->getTargetDetailsFromCode( $_GET['target'] );
+		$departmentDAO = new DepartmentDAO();
+		$department = $departmentDAO->getNameFromID($target->department);
 	} catch (Exception $e) {
 		echo 'Non è possibile accedere ai dettagli dell\'obiettivo.';
 		return;

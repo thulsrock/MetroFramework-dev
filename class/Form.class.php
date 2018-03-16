@@ -4,10 +4,11 @@ class Form {
 	
 	private $module;
 	private $action;
+	private $formName;
 	
 	public function __construct() {
 		
-		$this->form = $_POST['form'];
+		$this->formName = $_POST['form'];
 		$form = explode('-', $_POST['form']);
 
 		$this->module = $form[0];
@@ -21,51 +22,47 @@ class Form {
 			$this->formRequestHandler();
 			unset( $_REQUEST );
 		} catch (Exception $e) {
-			echo $e->getMessage();
+			throw new Exception( $e->getMessage() );
 		}
 	}
 	
 	public function formRequestHandler() {
-		switch( $this->form ) {
+		switch( $this->formName ) {
 			case TARGET_NEW:
 			case TARGET_EDIT:
-				$target = new Target();
-				$target->registerTarget( $_REQUEST, $this->action );
-				if( $this->form == TARGET_EDIT ) $this->action = TARGET_INDEX; 
-				break;
 			case TASK_NEW:
 			case TASK_EDIT:
-				$task = new Task();
-				$task->registerTask( $_REQUEST, $this->action );
-				if( $this->form == TASK_EDIT ) $this->action = TASK_INDEX; 
+				$module = $this->module;
+				$this->module = new $module();
+				$this->module->register( $_REQUEST, $this->action );
+				if( strpos( $this->formName, EDIT_PAGE ) ) $this->module->setLandingPage( $this->module->getDefaultPage() ); 
 				break;
 			case INDICATOR_EDIT:
 				$indicator = new Indicator();
 				$indicator->register( $_REQUEST );
-				$this->module = TASK;
-				$this->action = INDICATOR_INDEX;
+				$this->module = new Task();
 				break;
 			case USER_NEW:
-				$user = new User();
-				$user->registerUserInit( $_REQUEST );
+				$userDAO = new UserDAO();
+				$userDAO->registerUserInit( $_REQUEST );
 				break;
 			case USER_EDIT:
-				$user = new User();
-				$user->update( $_REQUEST );
-				$this->action = USER_INDEX;
+				$userDAO = new UserDAO();
+				$userDAO->update( $_REQUEST );
+				$this->module = new User();
 				break;
 			case USER_EDIT_FEATURE:
-				$user = new User();
-				$user->updateUserjobDetails( $_REQUEST );
-				$this->action = USER_EDIT;
+				$jobDAO = new JobDAO();
+				$jobDAO->updateUserjobDetails( $_REQUEST );
+				$this->module = new User();
 				break;
 			case PASSWORD_CHANGE:
-				$user = new User();
-				$user->passwordChange();
-				$this->module = FRONT_PAGE;
+				$userAccount = new Account();
+				$userAccount->passwordChange();
+				$this->module = new Core();
 				break;
 			default:
-				$this->module = FRONT_PAGE;
+				$this->module = new Core();
 				throw new Exception( 'Default per funzione ' . __FUNCTION__ );
 				break;
 		}

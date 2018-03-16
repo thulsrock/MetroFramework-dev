@@ -1,12 +1,21 @@
 <?php
 
-class Target extends TargetDAO {
+class Target extends Module {
 	
-	public function __construct() {
-		parent::__construct();
+	protected $defaultPage	= TARGET_DEFAULT_PAGE;
+	protected $path			= TARGET_DIR;
+	
+	public function actionHandler( String $action ) {
+		switch( $action ) {
+			case TARGET_EDIT:
+				$this->setLandingPage( $action );
+				break;
+			default: throw new Exception( FORBIDDEN_ACTION . ' ' . $this->getActionToPerform() );
+				break;
+		}
 	}
-	
-	public function registerTarget( array $newTarget, $status ) {
+		
+	public function register( array $newTarget, $status ) {
 		try {
 			$this->validateNewTarget( $newTarget );
 			$sanitizedTarget = $this->sanitizeNewTarget( $newTarget );

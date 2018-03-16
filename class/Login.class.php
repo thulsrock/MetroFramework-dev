@@ -2,30 +2,38 @@
 
 class Login {
 	
-	private $pdo;
+	private $username;
+	private $password;
+	private $loggedUser;
 	
-	public function __construct() {
-		$dao = new Dao();
-		$this->pdo = $dao->getPdo();
+	public function __construct( String $username, String $password ) {
+		$this->username = $username;
+		$this->password = $password;
+		$this->validation();
 	}
 		
-	public function validation( String $username, String $password ) {
-		$user = new User();
+	public function validation() {
+		$userDao = new UserDAO();
 		try {
-			$this->credentialsAreNotNull( $username, $password );
-			$user->userExists( $username );
-			$user->verifyPassword( $username, $password );
-			$user->userIsActive( $username );
-		} catch ( Exception $e ) {
-			throw new LoginValidationFailedException( $e->getMessage() );
-			return FALSE;
+			$this->credentialsAreNotNull();
+			$userDao->userExists($this->username);
+			$user = $userDao->getUserFromUsername($this->username);
+			$account = new Account();
+			$account->verifyPassword( $this->username, $this->password );
+			$this->loggedUser = $user;
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
+
+	}
+	
+	public function credentialsAreNotNull() {
+		if ( fieldIsEmpty($this->username) || fieldIsEmpty($this->password) ) {
+			throw new Exception(LOGIN_NULL_CREDENTIALS);
 		}
 	}
 	
-	public function credentialsAreNotNull( String $username, String $password ) {
-		if( $username == '' || $password == '' ) {
-			throw new LoginNullCredentialsException();
-		}
+	public function getLoggedUser() {
+		return $this->loggedUser;
 	}
-	
 }

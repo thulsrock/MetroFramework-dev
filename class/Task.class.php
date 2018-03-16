@@ -1,22 +1,32 @@
 <?php
 
-class Task extends TaskDAO {
+class Task extends Module {
+
+	protected $defaultPage	= TASK_DEFAULT_PAGE;
+	protected $path			= TASK_DIR;
 	
-	private $target;
-	private $code;
-	
-	public function __construct() {
-		parent::__construct();
+	public function actionHandler( String $action ) {
+		switch( $action ) {
+			case TASK_DELETE:
+				break;
+			case TASK_NEW:
+			case TASK_EDIT:
+				$this->register( $_REQUEST, $action );
+				$this->setLandingPage( $action );
+				break;
+
+			default: throw new Exception( FORBIDDEN_ACTION . ' ' . $action );
+				break;
+		}
 	}
 	
-	public function registerTask( array $element, $status ) {
+	public function register( array $element, $status ) {
 		try {
 			$this->validate( $element );
 			$sanitizedTask = $this->sanitizeNewTask( $element );
-			$this->upload( $sanitizedTask, $status );
+			$this->save( $sanitizedTask, $status );
 		} catch (Exception $e) {
-			echo $e->getMessage();
-			throw new Exception('Registrazione attività fallita.');
+			throw new Exception( $e->getMessage() );
 		}
 	}
 	

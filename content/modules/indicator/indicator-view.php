@@ -3,10 +3,8 @@
 	$target = esc( $_GET['target'] );
 	$code = esc( $_GET['code'] );
 		
-	$taskManager = new Task();
-	$task = $taskManager->getTaskDetail( $target, $code );
-	$taskStaff = $taskManager->getStaff($target, $code);
-	$task->department = $taskManager->getDepartment( $target );
+	$taskDAO = new TaskDAO();
+	$task = $taskDAO->getAllDetails($target, $code);
 	
 	$encodedFileDir = UPLOAD_DIR . rawurlencode( $task->department->name ) . DIRECTORY_SEPARATOR . $target . DIRECTORY_SEPARATOR . $code;
 	$encodedReportDir = REPORT_DIR . CURRENT_YEAR . DIRECTORY_SEPARATOR . rawurlencode( $task->department->name ) . DIRECTORY_SEPARATOR . $target;
@@ -39,9 +37,6 @@
 				</a>
 		</div>
 	</div>
-
-	
- 	
 
 <?php ob_start(); ?>
 
@@ -116,8 +111,8 @@
 					<label>Personale impiegato</label>
 					<div class='full_height'>
 					<?php
-						if( $taskStaff ) { 
-							foreach ( $taskStaff as $staff ) { ?>
+						if( $task->staff ) { 
+							foreach ( $task->staff as $staff ) { ?>
 								<div class='padding'><?php echo $staff->user; ?></div>
 							<?php }
 							} else { ?> <div class='padding'>Non individuato.</div>

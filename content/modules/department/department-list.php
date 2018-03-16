@@ -1,7 +1,7 @@
 <?php
 
-	$departmentManager = new DepartmentDAO();
-	$departmentList = $departmentManager->departmentList();
+	$departmentDAO = new DepartmentDAO();
+	$departmentList = $departmentDAO->getList();
 
 ?>
 

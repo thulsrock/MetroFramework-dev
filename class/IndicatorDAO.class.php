@@ -1,14 +1,7 @@
 <?php
 
-class IndicatorDAO {
-	
-	private $pdo;
-	
-	public function __construct() {
-		$dao = new Dao();
-		$this->pdo = $dao->getPdo();
-	}
-	
+class IndicatorDAO extends DAO {
+
 	public function isComplete( String $target, String $code ) {
 		$query =	"SELECT *
 					FROM task

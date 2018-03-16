@@ -2,47 +2,31 @@
 
 class GUI {
 		
+	private $module;
 	private $session;
 		
-	public function __construct( Session $session ) {
-		$this->session = $session;
+	public function __construct( Session &$session, Module &$module ) {
+		$this->module = &$module;
+		$this->session = &$session;
 	}
 
-	public function render( String $page, String $action = NULL ) {
+	public function render() {
 		ob_start();
-		$this->getComponent('header');		
-		$this->getBody( $page, $action );
-		$this->getComponent('footer');
-
+		$this->getComponent("header");		
+		$this->getBody();
+		$this->getComponent("footer");
 		$html = ob_get_clean();		
 		echo $html;
 	}
 	
-	public function getBody( String $module, String $action = NULL ) {
+	public function getBody() {
 		try {
-			$file = $module;
-			if( $this->isModule( $file ) ) {
-				$file = $this->getModule( $module );
-				if ( $action != '' ) {
-					$file .= $action;
-				} else $file .= 'index';
-			} elseif ( file_exists( CONTENT_DIR . $file .'.php' ) ) {
-				$file =  CONTENT_DIR . $file;
-			}
+			$file = $this->module->getPath() . $this->module->getLandingPage();
 			$this->getFile( $file );
 		}  catch (Exception $e) {
-			$exceptionRender = new ExceptionRender( $e );
+			$render = new Render( $e );
 			$this->fileNotFound();
 		}
-	
-	}
-
-	public function isModule( String $module ) {
-		return file_exists( MODULE_DIR . $module .'/');
-	}
-	
-	public function getModule( String $module ) {
-		return  MODULE_DIR . $module .'/';
 	}
 
 	public function getComponent( String $module ){
@@ -50,16 +34,16 @@ class GUI {
 	}
 	
 	public function getFile( String $file ) {
-		$filename = $file . '.php';
+		$filename = $file . ".php";
 		if( !file_exists( $filename ) ) {
-			throw new FileNotFoundException( 'File ' . $file . ' non trovato.');
+			throw new Exception( "File " . $file . " non trovato." );
 		} else {
 			include ( $filename );
 		}
 	}
 	
 	public function fileNotFound() {
-		include CONTENT_DIR . 404 . '.php';
+		include CONTENT_DIR . 404 . ".php";
 	}
 	
 	public function getLoginPage(){

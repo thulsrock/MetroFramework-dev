@@ -4,17 +4,17 @@
 	$jobManager = new JobDAO();
 	$userID = $jobManager->getUserIDFromJobID( $jobID );
 	
-	$userManager = new User();
-	$user = $userManager->getUserDetailFromID( $userID );
-	$job = $userManager->getJobDetailFromID( $jobID );
+	$userDAO = new User();
+	$user = $userDAO->getUserDetailFromID( $userID );
+	$job = $userDAO->getJobDetailFromID( $jobID );
 	
 	$featureManager = new FeatureDAO();
 	$featureFullList = $featureManager->getFeatureFullList();
 	$job->features = $featureManager->getFeatureFromJobID( $jobID );
 	
-	$departmentManager = new DepartmentDAO();
-	$departmentList = $departmentManager->departmentList();
-	$departmentName = $departmentManager->getNameFromID( $job->department );	
+	$departmentDAO = new DepartmentDAO();
+	$departmentList = $departmentDAO->departmentList();
+	$departmentName = $departmentDAO->getNameFromID( $job->department );	
 	
 	$userURL =  $_SERVER['PHP_SELF'].'?module=user&action=edit&user='.esc( $userID );
 ?>

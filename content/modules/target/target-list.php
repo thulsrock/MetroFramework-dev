@@ -1,11 +1,11 @@
 <?php
-    $targetManager = new Target();
+    $targetDao = new TargetDAO();
 
 	if( isset( $_GET['department'] ) ) {
-		$departmentManager = new DepartmentDAO();
-		$depName = $departmentManager->getNameFromID( $_GET['department'] );
+		$departmentDAO = new DepartmentDAO();
+		$depName = $departmentDAO->getNameFromID( $_GET['department'] );
 		$deps[] = $_GET['department'];
-    } elseif ( $this->session->hasPrivilege( 'target-monitor' ) ) {
+    } elseif ( $this->session->hasPrivilege( TARGET_MONITOR ) ) {
     	$deps = NULL;
     } else {
     	try {
@@ -14,15 +14,15 @@
 			foreach( $activeUserJobs as $job ) {
 				if( isset( $job->features ) ) {
 	    			foreach ( $job->features as $feature ) {
-	    				if( $feature == 'target-view' ) $deps[] = $job->department;
+	    				if( $feature == TARGET_VIEW ) $deps[] = $job->department;
 	    			}
 	    		}
 	    	}
     	} catch (Exception $e) {
-    		echo 'Non si dispone di privilegi di visualizzazione degli obiettivi del proprio Servizio';
+    		throw new Exception( 'Non si dispone di privilegi di visualizzazione degli obiettivi del proprio Servizio' );
     	}
    	}
-    $targetList = $targetManager->list( $deps );
+    $targetList = $targetDao->getList( $deps );
 
 ?>
 
@@ -83,18 +83,17 @@
 					</div>
 					
 					<?php if( $this->session->hasPrivilege(TARGET_EDIT) ) { ?>
-					<div class="flex flex_column light_blue_background_hover">
-						<a style="height: 100%; width: 60px;" class="dark_blue_text_hover zoom" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=target&action=open&target=". $target->code ); ?>" title="Visualizza scheda obiettivo">
+					<div class="flex">
+						<a style="width: 60px;" class="dark_blue_text_hover zoom" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=target&action=".TARGET_EDIT."&target=". $target->code ); ?>" title="Visualizza scheda obiettivo">
 							<div class="flex align_middle full_height align_center" >
 								<i class="material-icons transition">zoom_in</i>
 							</div>
 						</a>
-					<!-- 	<a style="height: 50%; width: 60px;" class="zoom red_text_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=target&action=deleteTarget&target=". $target->code ); ?>" title="Elimina">
+				<!-- 	 	<a style="height: 50%; width: 60px;" class="zoom red_text_hover" href="<?php echo htmlspecialchars( $_SERVER['PHP_SELF'] ."?module=target&action=deleteTarget&target=". $target->code ); ?>" title="Elimina">
 							<div class="flex align_middle full_height align_center">
 								<i class="material-icons">delete</i>
 							</div>
-						 -->
-						</a>
+				 -->		</a>
 					</div>
 					<?php } ?>
 				</div>	

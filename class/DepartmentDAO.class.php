@@ -1,25 +1,16 @@
 <?php
 
-class DepartmentDAO {
+class DepartmentDAO extends DAO {
 	
-	private $pdo;
-	
-	public function __construct() {
-		$dao = new Dao();
-		$this->pdo = $dao->getPdo();
-	}
-	
-	public function departmentList() {
-		$query =	"SELECT * 
+	public function getList() {
+		$query =	"SELECT *
 					FROM department
 					WHERE ( endDate IS NULL OR
-					endDate >= CURDATE() ) AND name LIKE 'Servizio%' 
+					endDate >= CURDATE() ) AND name LIKE 'Servizio%'
 					ORDER BY name ASC";
-		$stmt = $this->pdo->prepare ( $query );
-		$stmt->execute ();
-		return $stmt->fetchAll ( PDO::FETCH_OBJ );
+		return $this->queryObjList( $query );
 	}
-	
+
 	public function getNameFromID( $departmentID ) {
 		$query = "SELECT name FROM department WHERE ID = ?";
 		$stmt = $this->pdo->prepare ( $query );
